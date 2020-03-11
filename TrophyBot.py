@@ -30,6 +30,7 @@ def community_report(guild):
 
 agwebberley = 0
 
+
 async def user_metrics_background_task():
     global lasttime
     await client.wait_until_ready()
@@ -37,6 +38,7 @@ async def user_metrics_background_task():
     Python_Bot_Guild = client.get_guild(684816171316412458)
     while not client.is_closed():
         try:
+            # await on_ready()
             online, idle, offline = community_report(Python_Bot_Guild)
             with open("usermetrics.csv","a") as f:
                 f.write(f"{int(time.time())},{online},{idle},{offline}\n")
@@ -51,32 +53,34 @@ async def user_metrics_background_task():
             plt.legend()
             plt.savefig("online.png")
 
-            if time.time() == lasttime + 604800:
-                message.channel.send(uw)
+            print(uw)
+            if time.time() >= lasttime + 604800:  #604800 is a week in seconds
+                print(uw)
+                # await message.channel.send(uw)
                 with open('lasttime.json', 'w') as fp:
                     json.dump(lasttime, fp)
-            await asyncio.sleep(60)
+            await asyncio.sleep(10)
 
         except Exception as e:
             print(str(e))
-            await asyncio.sleep(60)
+            await asyncio.sleep(10)
 
 
 @client.event  # event decorator/wrapper
 async def on_ready():
+    global uw
     global Python_Bot_Guild
     global lasttime
     print(f"We have logged in as {client.user}")
-    json_data = json.loads(open('Wins.json').read())
+    uw = json.loads(open('Wins.json').read())
     #lasttime_json = json.loads(open('lasttime.json').read())
     #lastime = lasttime_json
-    lasttime = time.time() + 100
-
+    lasttime = int(time.time() - 604790)
+    print(lasttime)
 
 @client.event
 async def on_message(message):
-    global Python_Bot_Guildmomo youtube
-    
+    global Python_Bot_Guild
     global uw
 
 
