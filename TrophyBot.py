@@ -12,6 +12,7 @@ client = discord.Client()
 token = open("token.txt", "r").read()
 uw = {}
 
+
 def community_report(guild):
     online = 0
     idle = 0
@@ -30,6 +31,7 @@ def community_report(guild):
 agwebberley = 0
 
 async def user_metrics_background_task():
+    global lasttime
     await client.wait_until_ready()
     global Python_Bot_Guild
     Python_Bot_Guild = client.get_guild(684816171316412458)
@@ -49,6 +51,10 @@ async def user_metrics_background_task():
             plt.legend()
             plt.savefig("online.png")
 
+            if time.time() == lasttime + 604800:
+                message.channel.send(uw)
+                with open('lasttime.json', 'w') as fp:
+                    json.dump(lasttime, fp)
             await asyncio.sleep(60)
 
         except Exception as e:
@@ -59,68 +65,52 @@ async def user_metrics_background_task():
 @client.event  # event decorator/wrapper
 async def on_ready():
     global Python_Bot_Guild
+    global lasttime
     print(f"We have logged in as {client.user}")
-    json_data = json.loads(open('dict.json').read())
-    print(json_data)
-    print(type(json_data))
+    json_data = json.loads(open('Wins.json').read())
+    #lasttime_json = json.loads(open('lasttime.json').read())
+    #lastime = lasttime_json
+    lasttime = time.time() + 100
 
 
 @client.event
 async def on_message(message):
-    global Python_Bot_Guild
+    global Python_Bot_Guildmomo youtube
+    
     global uw
 
 
 
     print(f"{message.channel}: {message.author}: {message.author.name}: {message.content}")
     if message.channel == "trophy-room":
-        print("it works")
         if message.author.name in uw:
             uw[message.author.name] = uw[message.author.name] + 1
         else:
             uw[message.author.name] = 1
 
     try:
-        if "!py # of wins" == message.content.lower():
+        if "!tb # of wins" == message.content.lower():
+            if message.channel == 'trophy-room' and uw[message.author.name] > 0:
+                uw[message.author.name] - 1
             await message.channel.send(f"```{uw[message.author.name]}```")
     except KeyError:
         print("test")
         uw[message.author.name] = 1
+        
 
-    if "!py messages" == message.content.lower():
-        agwebberley -= 1
-        await message.channel.send(f"```{agwebberley}```")
+    if "!tb" == message.content.lower():
+        await message.channel.send(f'```Hi!/n all commands start with !tb\n !tb member count give you the member count of your server \n!tb community report tells you who is online, busy dnd idle, offline \n!tb # of wins tells you how many wins you have this week```')
 
-
-
-    if "!py" == message.content.lower():
-        await message.channel.send('Hi!')
-        await message.channel.send('all commands start with !py')
-        await message.channel.send('!py member count give you the member count of your server')
-        await message.channel.send('!py community report tells you who is online, busy dnd idle, offline')
-
-    if "!py member count" == message.content.lower():
+    if "!tb member count" == message.content.lower():
         await message.channel.send(f"```py\n{Python_Bot_Guild.member_count}```")
 
-    elif str(message.author) == 'agwebberley#9066' and "!py logout" == message.content.lower():
+    elif str(message.author) == 'agwebberley#9066' and "!tb logout" == message.content.lower():
         await client.close()
-    elif "!py save" == message.content.lower():
+    elif "!tb save" == message.content.lower():
         with open('dict.json', 'w') as fp:
             json.dump(uw, fp)
 
-
-    elif '!py stat' == message.content.lower():
-        mesg = await message.channel.send('Calculating...')
-        counter = 0
-        repeat = 0
-        for x in range(0, 1): # Repeats 4 times
-            async for msg in message.channel.history(limit=500):
-                if msg.author == message.author:
-                    counter += 1
-                    repeat += 1
-        await message.channel.send("{} has {} out of the first {} messages in {}".format(message.author, str(counter), 500*repeat, message.channel))
-
-    elif "!py community report" == message.content.lower():
+    elif "!tb community report" == message.content.lower():
         online, idle, offline = community_report(Python_Bot_Guild)
         await message.channel.send(f"```Online: {online}.\nIdle/busy/dnd: {idle}.\nOffline: {offline}```")
 
