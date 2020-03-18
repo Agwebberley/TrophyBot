@@ -1,7 +1,8 @@
-import discord
-import time
 import asyncio
+import discord
 import json
+import time
+
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -22,7 +23,7 @@ def community_report(guild):
     for m in guild.members:
         if str(m.status) == "online":
             online += 1
-        if str(m.status) == "offline":
+        elif str(m.status) == "offline":
             offline += 1
         else:
             idle += 1
