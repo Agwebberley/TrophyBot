@@ -13,6 +13,7 @@ token = open("token.txt", "r").read()
 uw = {}
 
 
+
 def community_report(guild):
     online = 0
     idle = 0
@@ -32,7 +33,6 @@ agwebberley = 0
 
 
 async def user_metrics_background_task():
-    global lasttime
     await client.wait_until_ready()
     global Python_Bot_Guild
     Python_Bot_Guild = client.get_guild(684816171316412458)
@@ -53,40 +53,40 @@ async def user_metrics_background_task():
             plt.legend()
             plt.savefig("online.png")
 
-            print(uw)
-            if time.time() >= lasttime + 604800:  #604800 is a week in seconds
-                print(uw)
-                # await message.channel.send(uw)
-                with open('lasttime.json', 'w') as fp:
-                    json.dump(lasttime, fp)
-            await asyncio.sleep(10)
 
         except Exception as e:
             print(str(e))
             await asyncio.sleep(10)
+
+async def winner_minute():
+    with open("lasttime.json", "w") as fp:
+        json.dump(int(time.time()), fp)
+
+
+#    lasttime = json.loads(open('lasttime.json').read())
+#    if int(time.time()) >= lasttime + 60:
+#        print(uw, "it works")
+#        with open("lasttime.json", "w") as fp:
+#            json.dump(lasttime, fp)
+    await asyncio.sleep(10)
 
 
 @client.event  # event decorator/wrapper
 async def on_ready():
     global uw
     global Python_Bot_Guild
-    global lasttime
     print(f"We have logged in as {client.user}")
+    print(str(int(time.time())))
     uw = json.loads(open('Wins.json').read())
-    #lasttime_json = json.loads(open('lasttime.json').read())
-    #lastime = lasttime_json
-    lasttime = int(time.time() - 604790)
-    print(lasttime)
+
+
 
 @client.event
 async def on_message(message):
     global Python_Bot_Guild
     global uw
-
-
-
     print(f"{message.channel}: {message.author}: {message.author.name}: {message.content}")
-    if message.channel == "trophy-room":
+    if "trophy-room" == f"{message.channel}":
         if message.author.name in uw:
             uw[message.author.name] = uw[message.author.name] + 1
         else:
@@ -111,7 +111,8 @@ async def on_message(message):
     elif str(message.author) == 'agwebberley#9066' and "!tb logout" == message.content.lower():
         await client.close()
     elif "!tb save" == message.content.lower():
-        with open('dict.json', 'w') as fp:
+        print("saved")
+        with open('Wins.json', 'w') as fp:
             json.dump(uw, fp)
 
     elif "!tb community report" == message.content.lower():
@@ -121,5 +122,6 @@ async def on_message(message):
         file = discord.File("online.png", filename="online.png")
         await message.channel.send("online.png", file=file)
 
+client.loop.create_task(winner_minute())
 client.loop.create_task(user_metrics_background_task())
 client.run(token)
