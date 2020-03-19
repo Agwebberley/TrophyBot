@@ -45,13 +45,14 @@ async def user_metrics_background_task():
 
             plt.clf()
             df = pd.read_csv("usermetrics.csv", names=['time', 'online', 'idle', 'offline'])
-            df['date'] = pd.to_datetime(df['time'],unit='s')
+            df['date'] = pd.to_datetime(df['time'], unit='s')
             df['total'] = df['online'] + df['offline'] + df['idle']
             df.drop("time", 1,  inplace=True)
             df.set_index("date", inplace=True)
             df['online'].plot()
             plt.legend()
             plt.savefig("online.png")
+            await asyncio.sleep(60)
 
 
         except Exception as e:
@@ -59,15 +60,12 @@ async def user_metrics_background_task():
             await asyncio.sleep(10)
 
 async def winner_minute():
-    with open("lasttime.json", "w") as fp:
-        json.dump(int(time.time()), fp)
-
-
-#    lasttime = json.loads(open('lasttime.json').read())
-#    if int(time.time()) >= lasttime + 60:
-#        print(uw, "it works")
-#        with open("lasttime.json", "w") as fp:
-#            json.dump(lasttime, fp)
+    global uw
+    lasttime = json.loads(open('lasttime.json').read())
+    if int(time.time()) >= lasttime + 60:
+        print(uw, "it works")
+        with open("lasttime.json", "w") as fp:
+            json.dump(lasttime, fp)
     await asyncio.sleep(10)
 
 
@@ -103,8 +101,11 @@ async def on_message(message):
         
 
     if "!tb" == message.content.lower():
-        await message.channel.send(f'```Hi!/n all commands start with !tb\n !tb member count give you the member count of your server \n!tb community report tells you who is online, busy dnd idle, offline \n!tb # of wins tells you how many wins you have this week```')
-
+        message1 = 'Hi!\n all commands start with !tb\n'
+        message2 = '!tb member count will give you the meber count of the current server \n'
+        message3 = '!tb community repport will tell you whos online, busy/dnd, and offline then display a graph\n'
+        message4 = '!tb # of wins will tell you how many wins you have'
+        await message.channel.send(f'```{message1}{message2}{message3}{message4}```')
     if "!tb member count" == message.content.lower():
         await message.channel.send(f"```py\n{Python_Bot_Guild.member_count}```")
 
