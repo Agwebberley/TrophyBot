@@ -101,8 +101,8 @@ async def on_message(message):
         
 
     if "!tb" == message.content.lower():
-        message1 = 'Hi!\n all commands start with !tb\n'
-        message2 = '!tb member count will give you the meber count of the current server \n'
+        message1 = 'Hi!\nall commands start with !tb\n'
+        message2 = '!tb member count will give you the meber count of the current server\n'
         message3 = '!tb community repport will tell you whos online, busy/dnd, and offline then display a graph\n'
         message4 = '!tb # of wins will tell you how many wins you have'
         await message.channel.send(f'```{message1}{message2}{message3}{message4}```')
