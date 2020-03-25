@@ -1,9 +1,13 @@
-import discord
-import time
 import asyncio
+import discord
 import json
+from heapq import nlargest
+import time
+
+
 
 import pandas as pd
+from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
 from matplotlib import style
 style.use("fivethirtyeight")
@@ -60,18 +64,29 @@ async def user_metrics_background_task():
             await asyncio.sleep(10)
 
 async def winner_minute():
-    global uw
-    lasttime = json.loads(open('lasttime.json').read())
-    if int(time.time()) >= lasttime + 60:
-        print(uw, "it works")
-        with open("lasttime.json", "w") as fp:
-            json.dump(lasttime, fp)
-    await asyncio.sleep(10)
+    await client.wait_until_ready()
+
+    uw = json.loads(open('Wins.json').read())
+    tempuw = uw
+    print(uw, "1 it works")
+    while not client.is_closed():
+        lasttime = json.loads(open('lasttime.json').read())
+        print("Test")
+        if int(time.time()) >= lasttime + 60:
+            print(uw, "it works")
+
+            three_largest = nlargest(3, tempuw, key=tempuw.get)
+            print(three_largest)
+
+            lasttime = int(time.time())
+            with open("lasttime.json", "w") as fp:
+                json.dump(lasttime, fp)
+        await asyncio.sleep(10)
 
 
 @client.event  # event decorator/wrapper
 async def on_ready():
-    global uw
+
     global Python_Bot_Guild
     print(f"We have logged in as {client.user}")
     print(str(int(time.time())))
@@ -82,23 +97,28 @@ async def on_ready():
 @client.event
 async def on_message(message):
     global Python_Bot_Guild
-    global uw
+
+    uw = json.loads(open('Wins.json').read())
+
     print(f"{message.channel}: {message.author}: {message.author.name}: {message.content}")
     if "trophy-room" == f"{message.channel}":
         if message.author.name in uw:
             uw[message.author.name] = uw[message.author.name] + 1
         else:
             uw[message.author.name] = 1
+            
+        with open('Wins.json', 'w') as fp:
+            json.dump(uw, fp)
 
-    try:
-        if "!tb # of wins" == message.content.lower():
-            if message.channel == 'trophy-room' and uw[message.author.name] > 0:
-                uw[message.author.name] - 1
-            await message.channel.send(f"```{uw[message.author.name]}```")
-    except KeyError:
-        print("test")
-        uw[message.author.name] = 1
-        
+ 
+    if "!tb # of wins" == message.content.lower():
+        if message.channel == 'trophy-room' and uw[message.author.name] > 0:
+            uw[message.author.name] - 1
+        await message.channel.send(f"```{uw[message.author.name]}```")
+        with open('Wins.json', 'w') as fp:
+            json.dump(uw, fp)
+
+            
 
     if "!tb" == message.content.lower():
         message1 = 'Hi!\nall commands start with !tb\n'
@@ -123,6 +143,7 @@ async def on_message(message):
         file = discord.File("online.png", filename="online.png")
         await message.channel.send("online.png", file=file)
 
+    #self.loop.create_task(self.winner_minute())
 client.loop.create_task(winner_minute())
 client.loop.create_task(user_metrics_background_task())
 client.run(token)
