@@ -17,8 +17,8 @@ uw = json.loads(open('Wins.json').read())
 
 
 def community_report(guild):
-    online = 0
-    idle = 0
+    online  = 0
+    idle    = 0
     offline = 0
 
     for m in guild.members:
