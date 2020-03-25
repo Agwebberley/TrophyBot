@@ -1,10 +1,7 @@
 import asyncio
 import discord
 import json
-from heapq import nlargest
 import time
-
-
 
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
@@ -14,7 +11,8 @@ style.use("fivethirtyeight")
 
 client = discord.Client()
 token = open("token.txt", "r").read()
-uw = {}
+
+uw = json.loads(open('Wins.json').read())
 
 
 
@@ -34,6 +32,21 @@ def community_report(guild):
     return online, idle, offline
 
 agwebberley = 0
+
+def find_winners():
+    uw = json.loads(open('Wins.json').read())
+    tempuw = uw
+    winner_list = [] 
+
+    for i in range(3):
+        winner_list.append(max(tempuw, key=tempuw.get))
+        #tempuw.remove(max(tempuw, key=tempuw.get)) 
+        top = max(tempuw, key=tempuw.get)
+        del tempuw[top]
+        print(winner_list)
+    return winner_list
+
+
 
 
 async def user_metrics_background_task():
@@ -75,8 +88,7 @@ async def winner_minute():
         if int(time.time()) >= lasttime + 60:
             print(uw, "it works")
 
-            three_largest = nlargest(3, tempuw, key=tempuw.get)
-            print(three_largest)
+            find_winners()
 
             lasttime = int(time.time())
             with open("lasttime.json", "w") as fp:
