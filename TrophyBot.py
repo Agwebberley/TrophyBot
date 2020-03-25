@@ -123,7 +123,7 @@ async def on_message(message):
             json.dump(uw, fp)
 
  
-    if "!tb # of wins" == message.content.lower():
+    if "!tb wins" == message.content.lower():
         if message.channel == 'trophy-room' and uw[message.author.name] > 0:
             uw[message.author.name] - 1
         await message.channel.send(f"```{uw[message.author.name]}```")
