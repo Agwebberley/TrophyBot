@@ -37,16 +37,32 @@ def find_winners():
     uw = json.loads(open('Wins.json').read())
     tempuw = uw
     winner_list = [] 
+    print(uw, "  ", tempuw)
 
     for i in range(3):
         winner_list.append(max(tempuw, key=tempuw.get))
         #tempuw.remove(max(tempuw, key=tempuw.get)) 
         top = max(tempuw, key=tempuw.get)
+        winner_list[i] = winner_list[i] + "   " + str(tempuw.get(winner_list[i]))
         del tempuw[top]
         print(winner_list)
+
+
+        print(winner_list)  
+
     return winner_list
 
+def create_image(winners):
+    img = Image.open("placement.jpg")
+    draw = ImageDraw.Draw(img)
 
+    font = ImageFont.truetype("BUNGEEINLINE-REGULAR.ttf", 16)
+
+    draw.text((30, 43), winners[0],(255,255,255),font=font)
+    draw.text((30, 85), winners[1],(255,255,255),font=font)
+    draw.text((30, 130), winners[2],(255,255,255),font=font)
+    
+    img.save('placement_temp.jpg')
 
 
 async def user_metrics_background_task():
@@ -85,10 +101,11 @@ async def winner_minute():
     while not client.is_closed():
         lasttime = json.loads(open('lasttime.json').read())
         print("Test")
-        if int(time.time()) >= lasttime + 60:
+        if int(time.time()) >= lasttime + 10:
             print(uw, "it works")
 
-            find_winners()
+            winners = find_winners()
+            create_image(winners)
 
             lasttime = int(time.time())
             with open("lasttime.json", "w") as fp:
