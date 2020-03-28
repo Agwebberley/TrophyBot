@@ -2,7 +2,7 @@ import asyncio
 import discord
 import json
 import time
-
+from discord.utils import get
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
@@ -52,7 +52,7 @@ def find_winners():
 
     return winner_list
 
-def create_image(winners):
+async def create_image(winners):
     img = Image.open("placement.jpg")
     draw = ImageDraw.Draw(img)
 
@@ -63,6 +63,24 @@ def create_image(winners):
     draw.text((30, 130), winners[2],(255,255,255),font=font)
     
     img.save('placement_temp.jpg')
+
+    json.loads(open('send_message.json').read())
+
+
+@client.event
+async def send_winners():
+    img = Image.open("placement_temp.jpg")
+
+    send_winners = json.loads(open('send_message.json').read())
+
+    if send_winners == yes:
+        channel = get(guild.channels, name="announcements", type=discord.ChannelType.text)
+        await Discord.discord.message.channel.send(channel, "<@&684816171316412458> And the Winners of this week are:", img)
+        send_winners = no
+        with open("winner_send.json", "w") as fp:
+            json.dump(send_winners, fp)
+    await asyncio.sleep(10)
+
 
 
 async def user_metrics_background_task():
@@ -92,6 +110,7 @@ async def user_metrics_background_task():
             print(str(e))
             await asyncio.sleep(10)
 
+
 async def winner_minute():
     await client.wait_until_ready()
 
@@ -105,7 +124,7 @@ async def winner_minute():
             print(uw, "it works")
 
             winners = find_winners()
-            create_image(winners)
+            await create_image(winners)
 
             lasttime = int(time.time())
             with open("lasttime.json", "w") as fp:
@@ -174,5 +193,6 @@ async def on_message(message):
 
     #self.loop.create_task(self.winner_minute())
 client.loop.create_task(winner_minute())
+client.loop.create_task(send_winners())
 client.loop.create_task(user_metrics_background_task())
 client.run(token)
