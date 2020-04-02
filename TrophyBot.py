@@ -8,16 +8,15 @@ import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
 from matplotlib import style
-style.use("fivethirtyeight")
 
+
+style.use("fivethirtyeight")
 client = discord.Client()
 token = open("token.txt", "r").read()
 
-uw = json.loads(open('Wins.json').read())
-
-
 
 def community_report(guild):
+
     online  = 0
     idle    = 0
     offline = 0
@@ -34,14 +33,13 @@ def community_report(guild):
 
 
 def find_winners():
+
     uw = json.loads(open('Wins.json').read())
     tempuw = uw
     winner_list = [] 
 
-
     for i in range(3):
         winner_list.append(max(tempuw, key=tempuw.get))
-        #tempuw.remove(max(tempuw, key=tempuw.get)) 
         top = max(tempuw, key=tempuw.get)
         winner_list[i] = winner_list[i] + "   " + str(tempuw.get(winner_list[i]))
         del tempuw[top]
@@ -51,9 +49,9 @@ def find_winners():
 
 
 async def create_image(winners):
+
     img = Image.open("placement.jpg")
     draw = ImageDraw.Draw(img)
-
     font = ImageFont.truetype("BUNGEEINLINE-REGULAR.ttf", 16)
 
     draw.text((30, 43), winners[0],(255,255,255),font=font)
@@ -85,12 +83,12 @@ async def send_winners():
 
 
 async def user_metrics_background_task():
+
     await client.wait_until_ready()
     global Python_Bot_Guild
     Python_Bot_Guild = client.get_guild(684816171316412458)
     while not client.is_closed():
         try:
-            # await on_ready()
             online, idle, offline = community_report(Python_Bot_Guild)
             with open("usermetrics.csv","a") as f:
                 f.write(f"{int(time.time())},{online},{idle},{offline}\n")
@@ -112,7 +110,8 @@ async def user_metrics_background_task():
             await asyncio.sleep(10)
 
 
-async def winner_minute():
+async def winner_week():
+
     await client.wait_until_ready()
 
     uw = json.loads(open('Wins.json').read())
@@ -130,10 +129,10 @@ async def winner_minute():
             lasttime = int(time.time())
             with open("lasttime.json", "w") as fp:
                 json.dump(lasttime, fp)
-        await asyncio.sleep(10)
+        await asyncio.sleep(60)
 
 
-@client.event  # event decorator/wrapper
+@client.event  
 async def on_ready():
 
     global Python_Bot_Guild
@@ -146,6 +145,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+
     global Python_Bot_Guild
 
     uw = json.loads(open('Wins.json').read())
@@ -178,9 +178,6 @@ async def on_message(message):
             await message.channel.send("!tb send")
 
 
-
-
-
     if "trophy-room" == f"{message.channel}":
         if message.author.name in uw:
             uw[message.author.name] = uw[message.author.name] + 1
@@ -198,19 +195,22 @@ async def on_message(message):
         with open('Wins.json', 'w') as fp:
             json.dump(uw, fp)
 
-            
 
     if "!tb" == message.content.lower():
         message1 = 'Hi!\nall commands start with !tb\n'
         message2 = '!tb member count will give you the meber count of the current server\n'
         message3 = '!tb community repport will tell you whos online, busy/dnd, and offline then display a graph\n'
-        message4 = '!tb # of wins will tell you how many wins you have'
+        message4 = '!tb wins will tell you how many wins you have'
         await message.channel.send(f'```{message1}{message2}{message3}{message4}```')
+
+
     if "!tb member count" == message.content.lower():
         await message.channel.send(f"```py\n{Python_Bot_Guild.member_count}```")
 
     elif str(message.author) == 'agwebberley#9066' and "!tb logout" == message.content.lower():
         await client.close()
+
+
     elif "!tb save" == message.content.lower():
         print("saved")
         with open('Wins.json', 'w') as fp:
@@ -219,12 +219,11 @@ async def on_message(message):
     elif "!tb community report" == message.content.lower():
         online, idle, offline = community_report(Python_Bot_Guild)
         await message.channel.send(f"```Online: {online}.\nIdle/busy/dnd: {idle}.\nOffline: {offline}```")
-
+        
         file = discord.File("online.png", filename="online.png")
         await message.channel.send("online.png", file=file)
 
-    #self.loop.create_task(self.winner_minute())
-client.loop.create_task(winner_minute())
-#client.loop.create_task(send_winners())
+
+client.loop.create_task(winner_week())
 client.loop.create_task(user_metrics_background_task())
 client.run(token)
