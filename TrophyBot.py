@@ -3,6 +3,7 @@ import discord
 import json
 import time
 from discord.utils import get
+from discord.ext import commands
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
@@ -31,13 +32,12 @@ def community_report(guild):
 
     return online, idle, offline
 
-agwebberley = 0
 
 def find_winners():
     uw = json.loads(open('Wins.json').read())
     tempuw = uw
     winner_list = [] 
-    print(uw, "  ", tempuw)
+
 
     for i in range(3):
         winner_list.append(max(tempuw, key=tempuw.get))
@@ -45,12 +45,10 @@ def find_winners():
         top = max(tempuw, key=tempuw.get)
         winner_list[i] = winner_list[i] + "   " + str(tempuw.get(winner_list[i]))
         del tempuw[top]
-        print(winner_list)
-
-
-        print(winner_list)  
 
     return winner_list
+
+
 
 async def create_image(winners):
     img = Image.open("placement.jpg")
@@ -64,7 +62,10 @@ async def create_image(winners):
     
     img.save('placement_temp.jpg')
 
-    json.loads(open('send_message.json').read())
+    send_message = True
+    with open('send_message.json', 'w') as fp:
+        json.dump(send_message, fp)
+
 
 
 @client.event
@@ -73,14 +74,14 @@ async def send_winners():
 
     send_winners = json.loads(open('send_message.json').read())
 
-    if send_winners == yes:
-        channel = get(guild.channels, name="announcements", type=discord.ChannelType.text)
-        await Discord.discord.message.channel.send(channel, "<@&684816171316412458> And the Winners of this week are:", img)
-        send_winners = no
+    if send_winners == True:
+        channel = client.get_channel("686026687145705505") #648365930639785985   
+        
+        await message.channel.send(channel, "<@&684816171316412458> And the Winners of this week are:", Image.open("placement_temp.jpg"))
+        send_winners = False
         with open("winner_send.json", "w") as fp:
             json.dump(send_winners, fp)
     await asyncio.sleep(10)
-
 
 
 async def user_metrics_background_task():
@@ -116,12 +117,12 @@ async def winner_minute():
 
     uw = json.loads(open('Wins.json').read())
     tempuw = uw
-    print(uw, "1 it works")
+
     while not client.is_closed():
         lasttime = json.loads(open('lasttime.json').read())
-        print("Test")
+
         if int(time.time()) >= lasttime + 10:
-            print(uw, "it works")
+
 
             winners = find_winners()
             await create_image(winners)
@@ -137,8 +138,9 @@ async def on_ready():
 
     global Python_Bot_Guild
     print(f"We have logged in as {client.user}")
-    print(str(int(time.time())))
     uw = json.loads(open('Wins.json').read())
+    channel = 686026687145705505
+
 
 
 
@@ -149,6 +151,36 @@ async def on_message(message):
     uw = json.loads(open('Wins.json').read())
 
     print(f"{message.channel}: {message.author}: {message.author.name}: {message.content}")
+
+
+
+    if message.content == "!tb send":
+
+        await message.delete()
+
+        send_winners = json.loads(open('send_message.json').read())
+
+        channel = client.get_channel("686026687145705505")
+        channel2 = channel
+        file = discord.File("placement_temp.jpg", filename="placement_temp.jpg")
+
+
+        if send_winners == True:
+            await message.channel.send("<@&684816171316412458> And the Winners of this week are:")
+            await message.channel.send("placement_temp.jpg", file=file)
+            send_winners = False
+            with open("winner_send.json", "w") as fp:
+                json.dump(send_winners, fp)
+            await asyncio.sleep(10)
+            await message.channel.send("!tb send")
+        else:
+            await asyncio.sleep(10)
+            await message.channel.send("!tb send")
+
+
+
+
+
     if "trophy-room" == f"{message.channel}":
         if message.author.name in uw:
             uw[message.author.name] = uw[message.author.name] + 1
@@ -193,6 +225,6 @@ async def on_message(message):
 
     #self.loop.create_task(self.winner_minute())
 client.loop.create_task(winner_minute())
-client.loop.create_task(send_winners())
+#client.loop.create_task(send_winners())
 client.loop.create_task(user_metrics_background_task())
 client.run(token)
