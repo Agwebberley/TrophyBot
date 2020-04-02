@@ -60,9 +60,9 @@ async def create_image(winners):
     
     img.save('placement_temp.jpg')
 
-    send_message = True
-    with open('send_message.json', 'w') as fp:
-        json.dump(send_message, fp)
+    send_winners = "Yes"
+    with open('send.txt', 'w') as f:
+        f.write(send_winners)
 
 
 
@@ -77,8 +77,8 @@ async def send_winners():
         
         await message.channel.send(channel, "<@&684816171316412458> And the Winners of this week are:", Image.open("placement_temp.jpg"))
         send_winners = False
-        with open("winner_send.json", "w") as fp:
-            json.dump(send_winners, fp)
+        with open("send.txt", "w") as f:
+            f.write(send_winners)
     await asyncio.sleep(10)
 
 
@@ -156,23 +156,27 @@ async def on_message(message):
 
     if message.content == "!tb send":
 
-        await message.delete()
+        try:
+            await message.delete()
+        except:
+            print("nothing to be worried about")
 
-        send_winners = json.loads(open('send_message.json').read())
-
-        channel = client.get_channel("686026687145705505")
-        channel2 = channel
+        send_winners = open("send.txt").read()
         file = discord.File("placement_temp.jpg", filename="placement_temp.jpg")
+        print(send_winners)
 
-
-        if send_winners == True:
+        if send_winners == "Yes":
             await message.channel.send("<@&684816171316412458> And the Winners of this week are:")
             await message.channel.send("placement_temp.jpg", file=file)
-            send_winners = False
-            with open("winner_send.json", "w") as fp:
-                json.dump(send_winners, fp)
+
+            send_winners = "Not Yet"
+
+            with open("send.txt", "w") as f:
+                f.write(send_winners)
+
             await asyncio.sleep(10)
             await message.channel.send("!tb send")
+
         else:
             await asyncio.sleep(10)
             await message.channel.send("!tb send")
@@ -183,6 +187,7 @@ async def on_message(message):
             uw[message.author.name] = uw[message.author.name] + 1
         else:
             uw[message.author.name] = 1
+        uw["TrophyBot"] = 0
             
         with open('Wins.json', 'w') as fp:
             json.dump(uw, fp)
