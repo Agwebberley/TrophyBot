@@ -64,29 +64,11 @@ async def create_image(winners):
     with open('send.txt', 'w') as f:
         f.write(send_winners)
 
-
-
-@client.event
-async def send_winners():
-    img = Image.open("placement_temp.jpg")
-
-    send_winners = json.loads(open('send_message.json').read())
-
-    if send_winners == True:
-        channel = client.get_channel("686026687145705505") #648365930639785985   
-        
-        await message.channel.send(channel, "<@&684816171316412458> And the Winners of this week are:", Image.open("placement_temp.jpg"))
-        send_winners = False
-        with open("send.txt", "w") as f:
-            f.write(send_winners)
-    await asyncio.sleep(10)
-
-
 async def user_metrics_background_task():
 
     await client.wait_until_ready()
     global Python_Bot_Guild
-    Python_Bot_Guild = client.get_guild(684816171316412458)
+    Python_Bot_Guild = client.get_guild(307259911383810048)
     while not client.is_closed():
         try:
             online, idle, offline = community_report(Python_Bot_Guild)
@@ -120,7 +102,7 @@ async def winner_week():
     while not client.is_closed():
         lasttime = json.loads(open('lasttime.json').read())
 
-        if int(time.time()) >= lasttime + 10:
+        if int(time.time()) >= lasttime + 604800:  #a week in seconds
 
 
             winners = find_winners()
@@ -166,6 +148,12 @@ async def on_message(message):
         print(send_winners)
 
         if send_winners == "Yes":
+
+            uw = {}
+            with open('Wins.json', 'w') as fp:
+                json.dump(uw, fp)
+
+
             await message.channel.send("<@&684816171316412458> And the Winners of this week are:")
             await message.channel.send("placement_temp.jpg", file=file)
 
