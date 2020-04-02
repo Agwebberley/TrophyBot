@@ -1,0 +1,5 @@
+('c:\\users\\agweb\\appdata\\local\\programs\\python\\python38\\lib\\site-packages\\soupsieve-1.9.5-py3.8.egg',
+ None,
+ {'*.pyc', '*.pyd', '*.py', '*.pyw', '*.cp38-win_amd64.pyd', 'EGG-INFO'},
+ 'DATA',
+ [])
